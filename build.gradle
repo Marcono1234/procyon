@@ -121,91 +121,89 @@ subprojects {
         }
     }
 
-    if (project.name != "Procyon.Decompiler") {
-        javadoc {
-            options.encoding = 'UTF-8'
-        }
+    javadoc {
+        options.encoding = 'UTF-8'
+    }
 
-        artifacts {
-            archives jar
-            archives javadocJar
-            archives sourcesJar
-        }
+    artifacts {
+        archives jar
+        archives javadocJar
+        archives sourcesJar
+    }
 
-        if (shouldSign) {
-            signing {
-                sign configurations.archives
+    if (shouldSign) {
+        signing {
+            sign configurations.archives
+        }
+    }
+    
+    uploadArchives {
+        repositories.mavenDeployer {
+            if (shouldSign) {
+                beforeDeployment { MavenDeployment deployment ->
+                    signing.signPom(deployment)
+                }
             }
-        }
 
-        uploadArchives {
-            repositories.mavenDeployer {
-                if (shouldSign) {
-                    beforeDeployment { MavenDeployment deployment ->
-                        signing.signPom(deployment)
-                    }
-                }
+            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots") {
+                authentication(userName: project.properties.get("procyon.sonatype.username"),
+                               password: project.properties.get("procyon.sonatype.password"))
+            }
 
-                snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots") {
-                    authentication(userName: project.properties.get("procyon.sonatype.username"),
-                                   password: project.properties.get("procyon.sonatype.password"))
-                }
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2") {
+                authentication(userName: project.properties.get("procyon.sonatype.username"),
+                               password: project.properties.get("procyon.sonatype.password"))
+            }
 
-                repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2") {
-                    authentication(userName: project.properties.get("procyon.sonatype.username"),
-                                   password: project.properties.get("procyon.sonatype.password"))
-                }
+            pom {
+                groupId = project.group
+                version = project.version
+                artifactId = project.archivesBaseName
 
-                pom {
-                    groupId = project.group
-                    version = project.version
-                    artifactId = project.archivesBaseName
+                project {
+                    name project.archivesBaseName
+                    packaging 'jar'
+                    description 'Procyon'
+                    url 'https://bitbucket.org/mstrobel/procyon'
 
-                    project {
-                        name project.archivesBaseName
-                        packaging 'jar'
-                        description 'Procyon'
+                    scm {
                         url 'https://bitbucket.org/mstrobel/procyon'
+                        connection 'scm:hg:https://hg@bitbucket.org/mstrobel/procyon'
+                        developerConnection 'scm:hg:https://mstrobel@bitbucket.org/mstrobel/procyon'
+                    }
 
-                        scm {
-                            url 'https://bitbucket.org/mstrobel/procyon'
-                            connection 'scm:hg:https://hg@bitbucket.org/mstrobel/procyon'
-                            developerConnection 'scm:hg:https://mstrobel@bitbucket.org/mstrobel/procyon'
+                    issueManagement {
+                        system 'jira'
+                        url 'https://bitbucket.org/mstrobel/procyon/issues'
+                    }
+
+                    licenses {
+                        license {
+                            name 'The Apache Software License, Version 2.0'
+                            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                            distribution 'repo'
                         }
+                    }
 
-                        issueManagement {
-                            system 'jira'
-                            url 'https://bitbucket.org/mstrobel/procyon/issues'
-                        }
-
-                        licenses {
-                            license {
-                                name 'The Apache Software License, Version 2.0'
-                                url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                                distribution 'repo'
+                    developers {
+                        developer {
+                            id 'mstrobel'
+                            name 'Mike Strobel'
+                            roles {
+                                role 'owner'
+                                role 'packager'
+                                role 'developer'
                             }
                         }
+                    }
 
-                        developers {
-                            developer {
-                                id 'mstrobel'
-                                name 'Mike Strobel'
-                                roles {
-                                    role 'owner'
-                                    role 'packager'
-                                    role 'developer'
-                                }
-                            }
-                        }
-
-                        dependencies {
-                            dependency {
-                                groupId 'junit'
-                                artifactId 'junit'
-                                version '4.11'
-                                scope 'test'
+                    dependencies {
+                        dependency {
+                            groupId 'junit'
+                            artifactId 'junit'
+                            version '4.11'
+                            scope 'test'
 //                                optional = true
-                            }
                         }
                     }
                 }
